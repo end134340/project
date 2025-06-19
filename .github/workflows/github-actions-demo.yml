@@ -1,10 +1,10 @@
-name: GitHub Actions Demo
+name: GitHub Actions Demo # 액션? 이름
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
-on: [push]
-jobs:
+on: [push] # 이벤트
+jobs: # 이벤트가 발생하면 할 작업들.
   Explore-GitHub-Actions:
     runs-on: ubuntu-latest
-    steps:
+    steps: # echo: 정해진 문장을 콘솔에 출력하겠다는 명령어(우분투)
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
       - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
