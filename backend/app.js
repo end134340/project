@@ -13,7 +13,7 @@ app.get("/hello", (req, res) => {
   res.send("Hello World!");
 });
 
-
+//api붙이는 이유: api로 찾아와서.
 app.get("/api/board", (req, res) => {
   res.send({ title: "노드 api 서버 update!!!!" });
 });
