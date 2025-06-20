@@ -33,6 +33,6 @@ export default defineConfig({
   build : {
 	//vite를 기반으로 배포를 할 때 추가적인 설정을 하는 것. 원래는 frontapp안에 빌드 결과물을 저장하는데 outDir를 해서 이 경로에 만드는?거 
 	//자동으로 그 위치에 결과물 저장.
-   outDir :  '../backend/public'
+  // outDir :  '../backend/public'
   }
 })
