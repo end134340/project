@@ -1,0 +1,57 @@
+name: Build Vue and Deploy Node App
+
+on: # 이벤트 처리 등록 속성 
+  push: # push가 일어났을 때 
+    branches: # main 브런치에 
+      - main 
+
+#on:
+#  pull_request: # => merge
+#    types: [closed] # 정상적으로 close될 때(성공)
+#    branches: 
+#      - main 
+          
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository # 전환
+      uses: actions/checkout@v3 
+
+    - name: Setup Node.js # node 실행
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+
+    - name: Install frontapp dependencies 
+      working-directory: frontapp
+      run: npm ci # ci => clean install (기존 내용 지우고 다시 인스톨)
+
+    - name: Build Vue app # build
+      working-directory: frontapp
+      run: |
+        npm ci
+        npm run build
+
+    - name: Setup SSH key # github 변수에 저장된 키를 우분투에 복사 (우분투는 필요할 때마다 새로 생성? 되는 거라서... 키가 없기 때문에 )
+      run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa # 소유자를 제외하고 저 파일에 접근하지 못 하도록 함
+
+    # 서버에 접속하여 배포 실행          
+    - name: SSH into server and deploy
+      run: | # scp : 파일 전송. 저장된 키를 통해 접속을 하고 현재 지정된 경로에 있는 모든 파일을 네이버 클라우드에 있는 지정된 경로에 복사하라는 코드.
+        scp   -r -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -P ${{ secrets.SSH_PORT }} frontapp/dist/* ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/${{ secrets.SSH_USER }}/project/backend/public/
+        ssh -vvv -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }}  ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            cd ~/project
+            git pull origin main
+            cd backend
+            npm ci   # 모듈이 업그레이드 되었을 경우를 상정해 clean install
+            pm2 restart app || pm2 start app.js --name "app"
+            pm2 save
+          EOF
+
+        echo '== build end ==='
+        
