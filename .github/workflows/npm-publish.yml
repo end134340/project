@@ -19,22 +19,24 @@ jobs:
     - name: Checkout repository # 전환
       uses: actions/checkout@v3 
 
-    - name: Setup Node.js # node 실행
+    - name: Setup Node.js # node 다운로드
       uses: actions/setup-node@v3
       with:
         node-version: '20'
 
+     # 임시 서버인 ubuntu-latest에 frontapp 폴더 안에서 지정한 명령어 실행.
     - name: Install frontapp dependencies 
       working-directory: frontapp
       run: npm ci # ci => clean install (기존 내용 지우고 다시 인스톨)
-
-    - name: Build Vue app # build
+      # run: 명령어 다이렉트로 진행.
+    - name: Build Vue app # build 
       working-directory: frontapp
-      run: |
+      run: | # | => 여러 줄을 작성할 때 사용. run은 기본적으로 한 줄밖에 처리하지 못하지만 |를 넣으면 여러 줄을 실행할 수 있음.
         npm ci
         npm run build
 
-    - name: Setup SSH key # github 변수에 저장된 키를 우분투에 복사 (우분투는 필요할 때마다 새로 생성? 되는 거라서... 키가 없기 때문에 )
+     # github actions 변수에 저장된 private 키를 ubuntu에 복사 (우분투는 필요할 때마다 새로 생성? 되는 거라서... 키가 없기 때문에 )
+    - name: Setup SSH key 
       run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
